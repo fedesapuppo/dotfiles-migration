@@ -58,6 +58,15 @@ macOS keeps software and dotfiles separate. Two phases, run in order:
 Omarchy stays a single script because it already ships most of the
 toolchain, so only the delta is installed.
 
+## Shell
+
+`cd` is zoxide. Type part of a directory name from anywhere and it jumps
+to the best match (`cd dotfiles`, `cd medu`); real paths, `cd ..`, and
+`cd -` still behave normally. zoxide ranks by frecency and learns the
+directories you visit, so the database starts empty on a fresh install:
+`cd <keyword>` jumps only kick in once you have been somewhere at least
+once. `cdi` opens an interactive picker.
+
 ## Secrets
 
 Nothing secret is committed. Keys, tokens, and identifying values live

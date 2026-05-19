@@ -81,6 +81,11 @@ hardcode package lists in the script.
 - **Shell config parity**: `.zshrc` (mac) and `.bashrc` (omarchy) are
   translations of each other. When adding env vars / aliases / functions,
   add to both.
+- Smart `cd` via zoxide. `cd` is replaced by zoxide
+  (`zoxide init <shell> --cmd cd`) in both `.zshrc` and `.bashrc`. Do not
+  add a plain `cd` alias/function elsewhere, and keep the init present in
+  both shells. The frecency database is per-machine and built from use,
+  so it is empty right after a fresh install.
 - **Omarchy core patches**: custom tweaks to upstream Omarchy live in
   `omarchy/omarchy-core-changes.patch` and are applied via
   `git apply --3way` against `~/.local/share/omarchy`. Regenerate the
