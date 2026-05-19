@@ -292,9 +292,13 @@ tsl() {
 
 # Git
 alias g='git'
+alias gl='git log'
 alias gcm='git commit -m'
 alias gcam='git commit -a -m'
 alias gcad='git commit -a --amend'
+
+# zoxide (smart cd)
+eval "$(zoxide init zsh --cmd cd)"
 
 # Prompt
 PROMPT='%~ $(git_prompt_info) '

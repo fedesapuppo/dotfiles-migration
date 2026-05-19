@@ -6,6 +6,9 @@
 # Mise (already installed on Omarchy)
 eval "$(mise activate bash)"
 
+# zoxide (smart cd)
+eval "$(zoxide init bash --cmd cd)"
+
 # Locale
 export LANGUAGE=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
