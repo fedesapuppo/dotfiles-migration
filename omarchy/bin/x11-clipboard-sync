@@ -1,0 +1,25 @@
+#!/bin/bash
+# Sync X11 clipboard (CLIPBOARD + PRIMARY) to Wayland for XWayland apps (gitk, etc.)
+# Polls both selections via xclip and copies to Wayland via wl-copy when changed.
+
+# Prevent duplicate instances
+pgrep -f "x11-clipboard-sync" | grep -v $$ | xargs -r kill
+
+last_clip=""
+last_primary=""
+
+while true; do
+    clip=$(xclip -selection clipboard -o 2>/dev/null) || clip=""
+    if [[ -n "$clip" && "$clip" != "$last_clip" ]]; then
+        printf '%s' "$clip" | wl-copy
+        last_clip="$clip"
+    fi
+
+    primary=$(xclip -selection primary -o 2>/dev/null) || primary=""
+    if [[ -n "$primary" && "$primary" != "$last_primary" ]]; then
+        printf '%s' "$primary" | wl-copy
+        last_primary="$primary"
+    fi
+
+    sleep 0.5
+done

@@ -1,0 +1,7 @@
+---
+BUNDLE_BUILD__MYSQL2: "--with-ldflags=-L/usr/local/opt/openssl@1.1/lib --with-cppflags=-L/usr/local/opt/openssl@1.1/include"
+# GRAPHQL_PRO and GitHub-packages credentials are NOT stored here.
+# Bundler reads them from these env vars (set in ~/.secrets.env):
+#   BUNDLE_GEMS__GRAPHQL__PRO
+#   BUNDLE_RUBYGEMS__PKG__GITHUB__COM
+BUNDLE_BUILD__NIO4R: "--with-cflags=-Wno-incompatible-pointer-types"

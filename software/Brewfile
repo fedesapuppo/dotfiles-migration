@@ -1,0 +1,64 @@
+# =============================================================================
+# Brewfile — macOS software manifest (kept SEPARATE from dotfiles config)
+#
+# Apply:  brew bundle --file=software/Brewfile
+# Order is handled by Homebrew: formulae -> casks -> Mac App Store.
+#
+# Anything that cannot be installed via brew/mas is documented under
+# "Manual installs" at the bottom.
+# =============================================================================
+
+# --- CLI / developer tooling (formulae) -------------------------------------
+brew "mise"             # runtime version manager (Ruby/Node/...) — see shell/.tool-versions
+brew "python"
+brew "go"
+brew "rust"
+brew "starship"
+brew "fzf"
+brew "ripgrep"
+brew "bat"
+brew "eza"
+brew "fd"
+brew "jq"
+brew "tree"
+brew "tmux"
+brew "zoxide"
+brew "lazygit"
+brew "neovim"
+brew "overmind"         # Procfile process manager (bin/dev — needs tmux, above)
+brew "yarn"             # JS package manager (Rails asset/bin/dev workflows)
+brew "gh"
+brew "git-filter-repo"
+brew "imagemagick"
+brew "postgresql@16"
+brew "redis"
+# Ruby build dependencies (mise compiles Ruby from source)
+brew "openssl@3"
+brew "readline"
+brew "libyaml"
+brew "gmp"
+# Mac App Store CLI — needed for the `mas` entries below
+brew "mas"
+
+# --- GUI applications (casks) -----------------------------------------------
+cask "visual-studio-code"
+cask "alacritty"
+cask "docker"
+cask "hammerspoon"
+cask "rectangle"
+cask "google-chrome"
+cask "whatsapp"
+cask "localsend"
+cask "font-jetbrains-mono-nerd-font"
+
+# --- Mac App Store apps -----------------------------------------------------
+# Requires being signed in to the App Store. If `mas` fails (not signed in,
+# or app not yet "obtained" on this Apple ID), install it manually from the
+# App Store instead — search the app name.
+mas "Microsoft Outlook", id: 985367838
+
+# =============================================================================
+# Manual installs (NOT available via brew or mas)
+# =============================================================================
+# - (none currently) — every app above is reproducible via brew/mas.
+#   Add any future GUI app that has no cask here with a download URL and steps.

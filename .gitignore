@@ -1,0 +1,8 @@
+# Machine-local secrets — NEVER commit
+.secrets.env
+secrets.env
+worktree-setup/master.key
+
+# OS junk
+.DS_Store
+**/.DS_Store

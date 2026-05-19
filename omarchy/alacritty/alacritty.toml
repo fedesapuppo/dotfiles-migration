@@ -1,0 +1,28 @@
+general.import = [ "~/.config/omarchy/current/theme/alacritty.toml" ]
+
+[env]
+TERM = "xterm-256color"
+
+[terminal]
+osc52 = "CopyPaste"
+
+[selection]
+save_to_clipboard = true
+
+[font]
+normal = { family = "JetBrainsMonoNL Nerd Font" }
+bold = { family = "JetBrainsMonoNL Nerd Font" }
+italic = { family = "JetBrainsMonoNL Nerd Font" }
+size = 9
+
+[window]
+padding.x = 14
+padding.y = 14
+decorations = "None"
+
+[keyboard]
+
+[[keyboard.bindings]]
+key = "Return"
+mods = "Shift"
+chars = "\u001B\r"

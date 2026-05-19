@@ -1,0 +1,106 @@
+diff --git c/bin/omarchy-battery-remaining-time w/bin/omarchy-battery-remaining-time
+index 9c2c7019..c4f39593 100755
+--- c/bin/omarchy-battery-remaining-time
++++ w/bin/omarchy-battery-remaining-time
+@@ -5,12 +5,18 @@
+ battery_info=$(upower -i $(upower -e | grep BAT))
+ 
+ echo "$battery_info" | awk '/time to (empty|full)/ {
+-    hours = int($4)
+-    minutes = int(($4 - hours) * 60)
+-    if (minutes > 0) {
+-        printf "%dh %dm", hours, minutes
++    value = $4
++    unit = $5
++    if (unit ~ /^minute/) {
++        printf "%dm", int(value)
+     } else {
+-        printf "%dh", hours
++        hours = int(value)
++        minutes = int((value - hours) * 60)
++        if (minutes > 0) {
++            printf "%dh %dm", hours, minutes
++        } else {
++            printf "%dh", hours
++        }
+     }
+     exit
+ }'
+diff --git c/bin/omarchy-brightness-keyboard w/bin/omarchy-brightness-keyboard
+index 8c35b0ee..af3ea668 100755
+--- c/bin/omarchy-brightness-keyboard
++++ w/bin/omarchy-brightness-keyboard
+@@ -23,14 +23,19 @@ fi
+ max_brightness="$(brightnessctl -d "$device" max)"
+ current_brightness="$(brightnessctl -d "$device" get)"
+ 
+-# Calculate step as one unit (keyboards typically have discrete levels like 0-3).
++# Step divisor: 10 = 10% steps, 20 = 5% steps, 5 = 20% steps.
++STEP_DIVISOR=10
++step=$(( max_brightness / STEP_DIVISOR ))
++(( step < 1 )) && step=1
++
+ if [[ $direction == "cycle" ]]; then
+-  new_brightness=$(( (current_brightness + 1) % (max_brightness + 1) ))
++  new_brightness=$(( current_brightness + step ))
++  (( new_brightness > max_brightness )) && new_brightness=0
+ elif [[ $direction == "up" ]]; then
+-  new_brightness=$((current_brightness + 1))
++  new_brightness=$(( current_brightness + step ))
+   (( new_brightness > max_brightness )) && new_brightness=$max_brightness
+ else
+-  new_brightness=$((current_brightness - 1))
++  new_brightness=$(( current_brightness - step ))
+   (( new_brightness < 0 )) && new_brightness=0
+ fi
+ 
+diff --git c/bin/omarchy-theme-set-browser w/bin/omarchy-theme-set-browser
+index 0ff87091..572e86ba 100755
+--- c/bin/omarchy-theme-set-browser
++++ w/bin/omarchy-theme-set-browser
+@@ -2,7 +2,7 @@
+ 
+ CHROMIUM_THEME=~/.config/omarchy/current/theme/chromium.theme
+ 
+-if omarchy-cmd-present chromium || omarchy-cmd-present brave; then
++if omarchy-cmd-present chromium || omarchy-cmd-present brave || omarchy-cmd-present google-chrome-stable; then
+   if [[ -f $CHROMIUM_THEME ]]; then
+     THEME_RGB_COLOR=$(<$CHROMIUM_THEME)
+     THEME_HEX_COLOR=$(printf '#%02x%02x%02x' ${THEME_RGB_COLOR//,/ })
+@@ -21,4 +21,9 @@ if omarchy-cmd-present chromium || omarchy-cmd-present brave; then
+     echo "{\"BrowserThemeColor\": \"$THEME_HEX_COLOR\"}" | tee "/etc/brave/policies/managed/color.json" >/dev/null
+     brave --refresh-platform-policy --no-startup-window >/dev/null
+   fi
++
++  if omarchy-cmd-present google-chrome-stable; then
++    echo "{\"BrowserThemeColor\": \"$THEME_HEX_COLOR\"}" | tee "/etc/opt/chrome/policies/managed/color.json" >/dev/null
++    google-chrome-stable --refresh-platform-policy --no-startup-window >/dev/null
++  fi
+ fi
+diff --git c/config/hypr/bindings.conf w/config/hypr/bindings.conf
+index 62ad87c6..b5235f89 100644
+--- c/config/hypr/bindings.conf
++++ w/config/hypr/bindings.conf
+@@ -29,6 +29,9 @@ bindd = SUPER SHIFT ALT, X, X Post, exec, omarchy-launch-webapp "https://x.com/c
+ # Add extra bindings
+ # bind = SUPER SHIFT, R, exec, alacritty -e ssh your-server
+ 
++# Toggle Orca screen reader on/off
++bindd = , XF86LaunchA, Toggle Orca screen reader, exec, omarchy-toggle-orca
++
+ # Overwrite existing bindings, like putting Omarchy Menu on Super + Space
+ # unbind = SUPER, SPACE
+ # bindd = SUPER, SPACE, Omarchy menu, exec, omarchy-menu
+diff --git c/default/bash/aliases w/default/bash/aliases
+index 667912a8..692783f3 100644
+--- c/default/bash/aliases
++++ w/default/bash/aliases
+@@ -38,7 +38,7 @@ alias ...='cd ../..'
+ alias ....='cd ../../..'
+ 
+ # Tools
+-alias c='opencode'
++alias c='claude'
+ alias cx='printf "\033[2J\033[3J\033[H" && claude --allow-dangerously-skip-permissions'
+ alias d='docker'
+ alias r='rails'
