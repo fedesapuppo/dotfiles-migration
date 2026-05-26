@@ -159,7 +159,6 @@ export PATH="$PATH:$HOME/google-cloud-sdk/bin"
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-eval "$(~/.local/bin/mise activate zsh)"
 
 # Worktree helpers
 # Usage:
@@ -230,6 +229,7 @@ alias c='claude'
 cx() { printf "\033[2J\033[3J\033[H"; claude --allow-dangerously-skip-permissions "$@"; }
 alias d='docker'
 alias r='rails'
+alias ov='overmind start -f Procfile.dev'
 alias t='tmux attach || tmux new -s Work'
 n() { if [ "$#" -eq 0 ]; then command nvim . ; else command nvim "$@"; fi; }
 
@@ -297,9 +297,6 @@ alias gcm='git commit -m'
 alias gcam='git commit -a -m'
 alias gcad='git commit -a --amend'
 
-# zoxide (smart cd)
-eval "$(zoxide init zsh --cmd cd)"
-
 # Prompt
 PROMPT='%~ $(git_prompt_info) '
 
@@ -315,3 +312,6 @@ export LC_ALL=en_US.UTF-8
 
 # Added by Antigravity
 export PATH="/Users/fedesapuppo/.antigravity/antigravity/bin:$PATH"
+
+# zoxide (smart cd)
+eval "$(zoxide init zsh --cmd cd)"
