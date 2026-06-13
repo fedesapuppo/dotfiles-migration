@@ -35,9 +35,6 @@ hs.hotkey.bind({"cmd", "shift"}, "O", function() launch("Obsidian") end)
 -- Cmd + Shift + Option + G → WhatsApp
 hs.hotkey.bind({"cmd", "shift", "alt"}, "G", function() launch("WhatsApp") end)
 
--- Cmd + Shift + N → VS Code
-hs.hotkey.bind({"cmd", "shift"}, "N", function() launch("Visual Studio Code") end)
-
 -- Cmd + Shift + E → Outlook
 hs.hotkey.bind({"cmd", "shift"}, "E", function() launch("Microsoft Outlook") end)
 
