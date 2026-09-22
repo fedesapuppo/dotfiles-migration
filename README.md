@@ -30,7 +30,7 @@ latter.
 | `bundler/`, `npm/`, `gh/` | Tool configs (credentials come from env, see Secrets) |
 | `alacritty/`, `tmux/`, `hammerspoon/` | Terminal, multiplexer, macOS hotkeys |
 | `macos/` | macOS LaunchAgents (Caps Lock → Control remap via hidutil) |
-| `omarchy/` | Hyprland, waybar, walker, systemd, core patches |
+| `omarchy/` | Hyprland (`hypr-lua/` for Omarchy 4, `hypr/` for older), waybar, walker, systemd, core patches |
 
 ## Quick start
 
@@ -57,6 +57,32 @@ macOS keeps software and dotfiles separate. Two phases, run in order:
 
 Omarchy stays a single script because it already ships most of the
 toolchain, so only the delta is installed.
+
+## Omarchy 4
+
+Omarchy 4 configures Hyprland in Lua and replaced waybar and walker with
+the Omarchy shell. The script detects which generation it is on:
+
+- `~/.config/hypr/hyprland.lua` present: the deltas in
+  `omarchy/hypr-lua/` are appended to the matching user file, inside a
+  `dotfiles-migration` marker block. Omarchy's defaults load first, so
+  only the delta is carried here. Re-runs skip a file that already has
+  the block.
+- Older `.conf` layout: the full files in `omarchy/hypr/` are copied, as
+  before.
+
+`monitors.lua` is never touched, because display scale is per-machine.
+waybar and walker configs are copied only when those binaries exist, and
+a systemd unit is installed only when the system has no unit of that
+name. The core patch applies only to a git checkout in
+`~/.local/share/omarchy`; Omarchy 4 installs to `/usr/share/omarchy`,
+which is package-owned and must not be edited.
+
+What the Lua deltas change: Caps Lock to Control with compose on Right
+Alt, faster key repeat, mouse sensitivity, zero gaps with a 1px border,
+SUPER+SHIFT+S for screenshots (Omarchy 4 gives that key to Google Maps),
+and the X11 clipboard bridge on autostart. Every other binding in the
+old `bindings.conf` is an Omarchy 4 default already.
 
 ## Shell
 
@@ -99,10 +125,14 @@ Security, Accessibility) to register these.
 
 ## RailsPilot toolkit
 
-The dotfiles phase also fetches a private toolkit and links it into
-`~/.claude` (Claude config, skills, agents, statusline). It is optional
-and skipped cleanly if you do not have access. The Cursor wiring is
-intentionally skipped (unused here).
+The dotfiles phase also fetches the toolkit into
+`~/Code/railspilot/toolkit` and links its skills, agents and commands
+into `~/.claude`, one entry at a time. Local skills stay visible, and a
+name that both sides own stays with the local copy. `CLAUDE.md`,
+`settings.json` and `statusline.sh` are left alone: the personal copies
+in `claude/` own those. It is optional and skipped cleanly if you do not
+have access. The toolkit's own `bin/install` replaces all of it and
+hard-fails without `~/.cursor`, so it is not used here.
 
 ## If you also just wiped your drive
 

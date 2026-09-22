@@ -29,8 +29,5 @@ export NVM_DIR="$HOME/.nvm"
 # GO
 export PATH="$HOME/go/bin:$PATH"
 
-# postgresql@16 is keg-only — expose psql/createdb/pg_ctl
-export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
-
 # zoxide (smart cd)
 eval "$(zoxide init bash --cmd cd)"
