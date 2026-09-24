@@ -27,7 +27,7 @@ Supports two targets:
 | `tmux/`       | tmux.conf synced from Omarchy                             |
 | `hammerspoon/`| Hammerspoon global hotkeys (macOS Hyprland-style bindings) |
 | `macos/`      | macOS LaunchAgents (e.g. Caps Lock → Control via hidutil) |
-| `omarchy/`    | Hyprland, terminals, waybar, walker, systemd, core patches|
+| `omarchy/`    | Omarchy 4 deltas: Hyprland, terminals, systemd, bin       |
 
 ## Install flow
 
@@ -86,10 +86,9 @@ hardcode package lists in the script.
   add a plain `cd` alias/function elsewhere, and keep the init present in
   both shells. The frecency database is per-machine and built from use,
   so it is empty right after a fresh install.
-- **Omarchy core patches**: custom tweaks to upstream Omarchy live in
-  `omarchy/omarchy-core-changes.patch` and are applied via
-  `git apply --3way` against `~/.local/share/omarchy`. Regenerate the
-  patch if you change anything there.
+- **Omarchy 4 deltas**: files under `omarchy/` hold only overrides on
+  Omarchy's defaults, appended inside a marker block. Never copy a full
+  Omarchy config into the repo, and never edit `/usr/share/omarchy`.
 
 ## Testing changes
 

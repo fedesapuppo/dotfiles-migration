@@ -1,18 +1,12 @@
 #!/bin/bash
 # =============================================================================
-# Omarchy (Arch Linux) setup script
+# Omarchy 4 (Arch Linux) setup script
 # Run from the dotfiles-migration repo root
 # IMPORTANT: Do NOT change the login shell from bash — it breaks Omarchy boot.
-#
-# Handles both Omarchy generations:
-#   Omarchy 4+  -> Lua Hyprland config, omarchy shell, no waybar/walker
-#   Omarchy 2/3 -> .conf Hyprland config, waybar, walker
 # =============================================================================
 set -e
 
 echo "=== Omarchy Migration Setup ==="
-
-MARKER="-- === dotfiles-migration ==="
 
 # -----------------------------------------------------------------------------
 # System packages (pacman)
@@ -20,8 +14,7 @@ MARKER="-- === dotfiles-migration ==="
 # Omarchy already ships base-devel, git, mise, ruby, rust, docker, github-cli,
 # hyprland, starship, fzf, ripgrep, bat, eza, fd, jq, tmux, zoxide, lazygit,
 # neovim, imagemagick, claude-code, unzip, libyaml, postgresql-libs, and more —
-# see the package lists under /usr/share/omarchy/install/ (Omarchy 4) or
-# ~/.local/share/omarchy/install/ (older).
+# see the package lists under /usr/share/omarchy/install/.
 #
 # Only list packages Omarchy does NOT ship by default.
 PACMAN_PACKAGES=(
@@ -146,52 +139,41 @@ fi
 # -----------------------------------------------------------------------------
 # Omarchy desktop configs
 # -----------------------------------------------------------------------------
-if [ -f ~/.config/hypr/hyprland.lua ]; then
-  # Omarchy 4+: Omarchy's defaults load first and the user files override them,
-  # so only the delta is appended, inside a marker block that makes re-runs safe.
-  echo "-> Appending Hyprland overrides to the Lua config (Omarchy 4+)..."
-  for file in input looknfeel bindings autostart; do
-    target="$HOME/.config/hypr/$file.lua"
-    [ -f "$target" ] || continue
-    if grep -qF -- "$MARKER" "$target"; then
-      echo "   $file.lua — already applied, skipping"
-      continue
-    fi
-    {
-      echo ""
-      echo "$MARKER"
-      cat "omarchy/hypr-lua/$file.lua"
-      echo "-- === end dotfiles-migration ==="
-    } >> "$target"
-    echo "   $file.lua — appended"
-  done
-  # monitors.lua stays untouched: scale is per-machine.
-  hyprctl reload >/dev/null 2>&1 || true
-  if command -v hyprctl &>/dev/null; then
-    errors="$(hyprctl configerrors 2>/dev/null)"
-    [ -z "$errors" ] || printf "   Hyprland reported config errors:\n%s\n" "$errors"
+# Omarchy's defaults load first and the user files override them, so only the
+# delta is appended, inside a marker block that makes re-runs safe.
+append_delta() {
+  local source="$1" target="$2" comment="$3"
+  local marker="$comment === dotfiles-migration ==="
+  [ -f "$target" ] || return 0
+  if grep -qF -- "$marker" "$target"; then
+    echo "   $target — already applied, skipping"
+    return 0
   fi
-else
-  echo "-> Copying Omarchy desktop configs (pre-4 .conf layout)..."
-  mkdir -p ~/.config/hypr ~/.config/ghostty ~/.config/alacritty ~/.config/kitty
-  cp omarchy/hypr/*.conf ~/.config/hypr/
-  cp omarchy/ghostty/config ~/.config/ghostty/
-  cp omarchy/alacritty/alacritty.toml ~/.config/alacritty/
-  cp omarchy/kitty/kitty.conf ~/.config/kitty/
+  {
+    echo ""
+    echo "$marker"
+    cat "$source"
+    echo "$comment === end dotfiles-migration ==="
+  } >> "$target"
+  echo "   $target — appended"
+}
+
+echo "-> Appending Hyprland overrides..."
+for file in input looknfeel bindings autostart; do
+  append_delta "omarchy/hypr/$file.lua" "$HOME/.config/hypr/$file.lua" "--"
+done
+# monitors.lua stays untouched: scale is per-machine.
+hyprctl reload >/dev/null 2>&1 || true
+if command -v hyprctl &>/dev/null; then
+  errors="$(hyprctl configerrors 2>/dev/null)"
+  [ -z "$errors" ] || printf "   Hyprland reported config errors:\n%s\n" "$errors"
 fi
 
-# Bar and launcher: Omarchy 4 replaced both with the omarchy shell.
-if command -v waybar &>/dev/null; then
-  echo "-> Copying waybar config..."
-  mkdir -p ~/.config/waybar
-  cp omarchy/waybar/config.jsonc ~/.config/waybar/
-  cp omarchy/waybar/style.css ~/.config/waybar/
-fi
-if command -v walker &>/dev/null; then
-  echo "-> Copying walker config..."
-  mkdir -p ~/.config/walker
-  cp omarchy/walker/config.toml ~/.config/walker/
-fi
+echo "-> Appending terminal overrides..."
+append_delta omarchy/ghostty/config ~/.config/ghostty/config "#"
+append_delta omarchy/alacritty/alacritty.toml ~/.config/alacritty/alacritty.toml "#"
+append_delta omarchy/kitty/kitty.conf ~/.config/kitty/kitty.conf "#"
+append_delta omarchy/foot/foot.ini ~/.config/foot/foot.ini "#"
 
 # Systemd user services — only the ones this machine has no unit for already.
 echo "-> Installing systemd user services..."
@@ -212,20 +194,7 @@ echo "   Installed:${installed_units:- none}"
 # Custom bin scripts
 echo "-> Installing custom scripts..."
 mkdir -p ~/.local/bin
-cp omarchy/bin/x11-clipboard-sync ~/.local/bin/
-chmod +x ~/.local/bin/x11-clipboard-sync
-
-# Omarchy core patches (custom modifications to upstream)
-# Omarchy 4 ships as a pacman package in /usr/share/omarchy, which must not be
-# edited; the patch only applies to the older git checkout in ~/.local/share.
-echo "-> Applying Omarchy core patches..."
-if [[ -d ~/.local/share/omarchy/.git ]]; then
-  cd ~/.local/share/omarchy
-  git apply --3way "$OLDPWD/omarchy/omarchy-core-changes.patch" 2>/dev/null && echo "   Patch applied" || echo "   Patch had conflicts — review manually"
-  cd "$OLDPWD"
-else
-  echo "   Skipping (Omarchy 4 package install, or omarchy not a git repo)"
-fi
+install -m 755 omarchy/bin/* ~/.local/bin/
 
 # VS Code (install manually, extensions)
 echo ""

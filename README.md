@@ -30,7 +30,7 @@ latter.
 | `bundler/`, `npm/`, `gh/` | Tool configs (credentials come from env, see Secrets) |
 | `alacritty/`, `tmux/`, `hammerspoon/` | Terminal, multiplexer, macOS hotkeys |
 | `macos/` | macOS LaunchAgents (Caps Lock → Control remap via hidutil) |
-| `omarchy/` | Hyprland (`hypr-lua/` for Omarchy 4, `hypr/` for older), waybar, walker, systemd, core patches |
+| `omarchy/` | Omarchy 4 deltas: Hyprland, terminals, systemd units, `~/.local/bin` scripts |
 
 ## Quick start
 
@@ -60,29 +60,24 @@ toolchain, so only the delta is installed.
 
 ## Omarchy 4
 
-Omarchy 4 configures Hyprland in Lua and replaced waybar and walker with
-the Omarchy shell. The script detects which generation it is on:
+The script targets Omarchy 4 only. Omarchy's defaults load first and the
+user files override them, so the repo carries only the delta. Each delta
+is appended to the matching user file inside a `dotfiles-migration`
+marker block. Re-runs skip a file that already has the block.
 
-- `~/.config/hypr/hyprland.lua` present: the deltas in
-  `omarchy/hypr-lua/` are appended to the matching user file, inside a
-  `dotfiles-migration` marker block. Omarchy's defaults load first, so
-  only the delta is carried here. Re-runs skip a file that already has
-  the block.
-- Older `.conf` layout: the full files in `omarchy/hypr/` are copied, as
-  before.
+- `omarchy/hypr/*.lua`: Caps Lock to Control with compose on Right Alt,
+  faster key repeat, mouse sensitivity, zero gaps with a 1px border,
+  SUPER+SHIFT+S for screenshots (Omarchy 4 gives that key to Google
+  Maps), and the X11 clipboard bridge on autostart.
+- `omarchy/ghostty`, `omarchy/kitty`: ligatures off. Omarchy 4 depends
+  on `ttf-jetbrains-mono-nerd-basic`, which has no NL variant.
+- `omarchy/alacritty`, `omarchy/foot`: copy a selection to the clipboard
+  on release.
 
 `monitors.lua` is never touched, because display scale is per-machine.
-waybar and walker configs are copied only when those binaries exist, and
-a systemd unit is installed only when the system has no unit of that
-name. The core patch applies only to a git checkout in
-`~/.local/share/omarchy`; Omarchy 4 installs to `/usr/share/omarchy`,
-which is package-owned and must not be edited.
-
-What the Lua deltas change: Caps Lock to Control with compose on Right
-Alt, faster key repeat, mouse sensitivity, zero gaps with a 1px border,
-SUPER+SHIFT+S for screenshots (Omarchy 4 gives that key to Google Maps),
-and the X11 clipboard bridge on autostart. Every other binding in the
-old `bindings.conf` is an Omarchy 4 default already.
+A systemd unit is installed only when the system has no unit of that
+name. Everything in `omarchy/bin/` goes to `~/.local/bin`, including the
+Battle.net and Diablo IV launchers.
 
 ## Shell
 

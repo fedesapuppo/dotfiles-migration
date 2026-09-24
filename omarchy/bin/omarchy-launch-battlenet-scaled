@@ -1,0 +1,30 @@
+#!/bin/bash
+set -e
+
+PREFIX="$HOME/Games/battlenet"
+LAUNCHER="$PREFIX/drive_c/Program Files (x86)/Battle.net/Battle.net Launcher.exe"
+
+BNET_W="${BNET_W:-1152}"
+BNET_H="${BNET_H:-648}"
+BNET_OUT_W="${BNET_OUT_W:-3840}"
+BNET_OUT_H="${BNET_OUT_H:-2160}"
+
+if [[ ! -f $LAUNCHER ]]; then
+  echo "Battle.net is not installed. Run omarchy-install-gaming-battlenet first." >&2
+  exit 1
+fi
+
+env_args=(
+  WINEPREFIX="$PREFIX"
+  PROTONPATH=GE-Proton
+  GAMEID=umu-battlenet
+  PROTON_VERB=run
+)
+
+if command -v gamescope >/dev/null 2>&1; then
+  exec gamescope -W "$BNET_OUT_W" -H "$BNET_OUT_H" -w "$BNET_W" -h "$BNET_H" -f -F fsr -- \
+    env "${env_args[@]}" umu-run "$LAUNCHER"
+else
+  echo "gamescope not found, launching unscaled" >&2
+  exec env "${env_args[@]}" umu-run "$LAUNCHER"
+fi

@@ -1,0 +1,31 @@
+#!/bin/bash
+set -e
+
+PREFIX="$HOME/Games/battlenet"
+LAUNCHER="$PREFIX/drive_c/Program Files (x86)/Battle.net/Battle.net Launcher.exe"
+
+if [[ ! -f $LAUNCHER ]]; then
+  echo "Battle.net is not installed." >&2
+  exit 1
+fi
+
+if [[ ! -d /mnt/games/"Diablo IV" ]]; then
+  echo "Diablo IV not found at /mnt/games/Diablo IV. Is the drive mounted?" >&2
+  exit 1
+fi
+
+if pgrep -x gamescope-wl >/dev/null 2>&1; then
+  echo "closing the scaled launcher so the game gets native resolution" >&2
+  pkill -x gamescope-wl || true
+  for _ in $(seq 1 60); do
+    pgrep -x gamescope-wl >/dev/null 2>&1 || break
+    sleep 0.25
+  done
+fi
+
+exec env \
+  WINEPREFIX="$PREFIX" \
+  PROTONPATH=GE-Proton \
+  GAMEID=umu-battlenet \
+  PROTON_VERB=run \
+  umu-run "$LAUNCHER" --exec="launch fenris"
