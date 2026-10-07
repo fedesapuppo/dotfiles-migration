@@ -6,3 +6,10 @@ hl.config({
     border_size = 1,
   },
 })
+
+-- No animations.
+hl.config({
+  animations = {
+    enabled = false,
+  },
+})

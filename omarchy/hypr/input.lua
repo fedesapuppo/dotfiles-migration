@@ -1,4 +1,5 @@
 -- Caps Lock acts as Control; Right Alt is the compose key.
+-- Natural (inverse) scrolling on the touchpad.
 hl.config({
   input = {
     kb_layout = "us",
@@ -9,5 +10,9 @@ hl.config({
     numlock_by_default = true,
 
     sensitivity = 0.65,
+
+    touchpad = {
+      natural_scroll = true,
+    },
   },
 })

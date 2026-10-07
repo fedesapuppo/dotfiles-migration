@@ -66,7 +66,8 @@ is appended to the matching user file inside a `dotfiles-migration`
 marker block. Re-runs skip a file that already has the block.
 
 - `omarchy/hypr/*.lua`: Caps Lock to Control with compose on Right Alt,
-  faster key repeat, mouse sensitivity, zero gaps with a 1px border,
+  faster key repeat, mouse sensitivity, natural touchpad scrolling, zero
+  gaps with a 1px border, no animations,
   SUPER+SHIFT+S for screenshots (Omarchy 4 gives that key to Google
   Maps), and the X11 clipboard bridge on autostart.
 - `omarchy/ghostty`, `omarchy/kitty`: ligatures off. Omarchy 4 depends
