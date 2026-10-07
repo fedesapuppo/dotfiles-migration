@@ -14,6 +14,8 @@ export LC_ALL=en_US.UTF-8
 [ -f ~/.bash_aliases ] && . ~/.bash_aliases
 
 # Personal aliases (parity with .zshrc Tools section)
+alias c='claude'
+alias gl='git log'
 alias ov='overmind start -f Procfile.dev'
 
 # --- Secrets (NOT committed) ---
