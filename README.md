@@ -65,6 +65,15 @@ user files override them, so the repo carries only the delta. Each delta
 is appended to the matching user file inside a `dotfiles-migration`
 marker block. Re-runs skip a file that already has the block.
 
+- `omarchy/hypr/hyprland.lua`: on hybrid laptops where the iGPU drives the
+  panel, point VA-API at `radeonsi` instead of Omarchy 4.0.4's global
+  `nvidia` (black video in Chromium). Omarchy master already fixes this;
+  the override is inert once NVIDIA is the boot VGA device.
+- Legion Pro 7 16AFR10H only (DMI-gated): two firmware blobs the kernel
+  drivers need and linux-firmware does not ship yet, pinned by sha256:
+  `aw88399_acf.bin` for the woofer amp and `BT_RAM_CODE_MT6639_2_1_hdr.bin`
+  for MT7927 Bluetooth. Delete the step once `pacman -Ql linux-firmware`
+  lists them. Also clears the ideapad Bluetooth soft block.
 - `omarchy/hypr/*.lua`: Caps Lock to Control with compose on Right Alt,
   faster key repeat, mouse sensitivity, natural touchpad scrolling, zero
   gaps with a 1px border, no animations,
@@ -122,13 +131,13 @@ Security, Accessibility) to register these.
 ## RailsPilot toolkit
 
 The dotfiles phase also fetches the toolkit into
-`~/Code/railspilot/toolkit` and links its skills, agents and commands
-into `~/.claude`, one entry at a time. Local skills stay visible, and a
-name that both sides own stays with the local copy. `CLAUDE.md`,
-`settings.json` and `statusline.sh` are left alone: the personal copies
-in `claude/` own those. It is optional and skipped cleanly if you do not
-have access. The toolkit's own `bin/install` replaces all of it and
-hard-fails without `~/.cursor`, so it is not used here.
+`~/Code/railspilot/toolkit` and links it into `~/.claude` the way the Mac
+has it: `CLAUDE.md`, `settings.json` (statusline and session hooks),
+`statusline.sh`, `hooks` and `scripts` point at the toolkit, and skills,
+agents and commands link one entry at a time. Local skills stay visible,
+and a name that both sides own stays with the local copy. The personal
+`claude/CLAUDE.md` is the fallback when the clone fails. The toolkit's own
+`bin/install` hard-fails without `~/.cursor`, so it is not used here.
 
 ## If you also just wiped your drive
 

@@ -22,6 +22,7 @@ PACMAN_PACKAGES=(
   go               # not shipped (Omarchy has rust but not go)
   postgresql       # Omarchy ships postgresql-libs only; we need the server
   xclip            # required by omarchy/bin/x11-clipboard-sync
+  fwupd            # firmware updates via LVFS (fwupdmgr get-updates)
 )
 
 if command -v pacman &>/dev/null && (( ${#PACMAN_PACKAGES[@]} )); then
@@ -105,19 +106,26 @@ if [ ! -d "$TOOLKIT_DIR/.git" ]; then
     || echo "   Toolkit clone failed (need repo access?) — skipping"
 fi
 if [ -d "$TOOLKIT_DIR/.claude" ]; then
-  # Link the toolkit's skills, agents and commands one by one instead of
-  # symlinking the directories: local skills stay visible, and a name owned by
-  # both stays with the local copy. CLAUDE.md, settings.json and statusline.sh
-  # are left alone — the personal versions above own those.
-  # (The toolkit's own bin/install replaces all of it and hard-fails without
-  # ~/.cursor, which is unused here.)
-  echo "-> Linking RailsPilot toolkit skills, agents and commands into ~/.claude..."
+  # The toolkit owns CLAUDE.md, settings.json (which wires the statusline and
+  # session hooks), statusline.sh, hooks and scripts, same as on the Mac. The
+  # personal CLAUDE.md copied above stays as the fallback when the clone fails.
+  # Skills, agents and commands link one by one instead of as directories:
+  # local skills stay visible, and a name owned by both stays with the local copy.
+  # (The toolkit's own bin/install hard-fails without ~/.cursor, unused here.)
+  echo "-> Linking RailsPilot toolkit into ~/.claude..."
+  for item in CLAUDE.md settings.json statusline.sh hooks scripts; do
+    if [ -e "$HOME/.claude/$item" ] && [ ! -L "$HOME/.claude/$item" ]; then
+      cp -pR "$HOME/.claude/$item" "$HOME/.claude/$item.pre-toolkit.bak"
+    fi
+    ln -sfn "$TOOLKIT_DIR/.claude/$item" "$HOME/.claude/$item"
+  done
   mkdir -p ~/.claude/skills ~/.claude/agents ~/.claude/commands
   linked=0
   kept=""
   for src in "$TOOLKIT_DIR"/.claude/skills/*/; do
     [ -d "$src" ] || continue
     name="$(basename "$src")"
+    [ "$name" = synced ] && continue
     if [ -e "$HOME/.claude/skills/$name" ] || [ -L "$HOME/.claude/skills/$name" ]; then
       kept="$kept $name"
     else
@@ -159,10 +167,46 @@ append_delta() {
 }
 
 echo "-> Appending Hyprland overrides..."
-for file in input looknfeel bindings autostart; do
+for file in input looknfeel bindings autostart hyprland; do
   append_delta "omarchy/hypr/$file.lua" "$HOME/.config/hypr/$file.lua" "--"
 done
 # monitors.lua stays untouched: scale is per-machine.
+
+# Firmware the in-tree drivers need but linux-firmware does not ship yet.
+# Each blob is pinned by sha256; a mismatch leaves the system untouched.
+install_firmware() {
+  local url="$1" dest="$2" sha="$3" tmp
+  if [ -f "$dest" ] && echo "$sha  $dest" | sha256sum -c --quiet 2>/dev/null; then
+    echo "   $dest — present"
+    return 0
+  fi
+  tmp="$(mktemp)"
+  curl -fsSL "$url" -o "$tmp" || { echo "   $dest — download failed, skipping"; rm -f "$tmp"; return 0; }
+  if echo "$sha  $tmp" | sha256sum -c --quiet; then
+    sudo install -Dm644 "$tmp" "$dest" && echo "   $dest — installed"
+  else
+    echo "   $dest — checksum mismatch, not installed"
+  fi
+  rm -f "$tmp"
+}
+
+case "$(cat /sys/class/dmi/id/product_version 2>/dev/null)" in
+  "Legion Pro 7 16AFR10H")
+    echo "-> Legion Pro 7 Gen 10 firmware..."
+    # AW88399 woofer amp (snd_hda_scodec_aw88399); pending linux-firmware upstream.
+    install_firmware \
+      https://raw.githubusercontent.com/nadimkobeissi/16iax10h-linux-sound-saga/main/fix/firmware/aw88399_acf.bin \
+      /usr/lib/firmware/aw88399_acf.bin \
+      1e927c9bca76d868181c0f81df2bccef3cf19c7d0910219f229360c87babd42c
+    # MT7927 Bluetooth (btmtk); pending linux-firmware MR !946.
+    install_firmware \
+      https://raw.githubusercontent.com/morrownr/mt76/main/firmware/mt7927/BT_RAM_CODE_MT6639_2_1_hdr.bin \
+      /usr/lib/firmware/mediatek/mt7927/BT_RAM_CODE_MT6639_2_1_hdr.bin \
+      669c5c99a0c59c85c1285d3d1b8b31915c2d31341a2244f4eddcbfd60ffbbc76
+    # ideapad_laptop boots with Bluetooth soft-blocked and systemd persists it.
+    rfkill unblock bluetooth 2>/dev/null || true
+    ;;
+esac
 hyprctl reload >/dev/null 2>&1 || true
 if command -v hyprctl &>/dev/null; then
   errors="$(hyprctl configerrors 2>/dev/null)"
